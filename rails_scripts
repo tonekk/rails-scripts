@@ -1,0 +1,51 @@
+#!/usr/bin/env ruby
+
+LIST_HELP = 'list - lists all available commands / scripts'
+HELP_HELP = 'help <script> - prints usage for <script>'
+
+
+if !ARGV[0]
+
+  puts
+  puts "rails_scripts <script> to exec a script\n\n"
+  puts "built-in commands:\n"
+  puts "* #{LIST_HELP}"
+  puts "* #{HELP_HELP}\n\n"
+
+elsif ARGV[0] == 'list'
+
+  puts 'Available commands:'
+  puts '* list'
+  puts '* help'
+
+  Dir.glob(File.expand_path("../../tools/rails_scripts/*.rb",  __FILE__)) do |filename|
+    puts "* #{filename.split('/').last.slice(0..-4)}"
+  end
+
+  exit
+
+elsif ARGV[0] == 'help'
+
+  puts
+
+  if !ARGV[1] || ARGV[1] == 'help'
+    puts 'help <script> - prints usage for <script>'
+  elsif ARGV[1] == 'list'
+    puts 'list - lists all available commands / scripts'
+  else
+    require File.expand_path("../../tools/rails_scripts/#{ARGV[1]}.rb",  __FILE__)
+    puts "#{RailsScript.usage}"
+  end
+
+else
+
+  require File.expand_path('../../config/boot',  __FILE__)
+  require File.expand_path('../../config/application',  __FILE__)
+
+  Rails.env = 'development'
+  Rails.application.require_environment!
+
+  require File.expand_path("../../tools/rails_scripts/#{ARGV[0]}.rb",  __FILE__)
+
+  RailsScript.exec!
+end
